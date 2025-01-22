@@ -48,8 +48,19 @@
 import { useParams } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
+// Define types for product and media
+interface Product {
+  title: { rendered: string };
+  content: { rendered: string };
+  featured_media: number | null;
+}
+
+interface Media {
+  source_url: string;
+}
+
 // Fetch product data
-async function fetchProductData(id: string) {
+async function fetchProductData(id: string): Promise<Product> {
   const res = await fetch(`https://bullet-mart.net.pk/wp-json/wp/v2/product/${id}`);
   if (!res.ok) {
     throw new Error('Failed to fetch product data');
@@ -58,7 +69,7 @@ async function fetchProductData(id: string) {
 }
 
 // Fetch media data (for product image)
-async function fetchMediaData(mediaId: number) {
+async function fetchMediaData(mediaId: number): Promise<Media> {
   const res = await fetch(`https://bullet-mart.net.pk/wp-json/wp/v2/media/${mediaId}`);
   if (!res.ok) {
     throw new Error('Failed to fetch media data');
@@ -68,7 +79,7 @@ async function fetchMediaData(mediaId: number) {
 
 export default function ProductPage() {
   const { id } = useParams(); // Dynamic ID from URL
-  const [product, setProduct] = useState(null);
+  const [product, setProduct] = useState<Product | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 

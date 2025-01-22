@@ -1,5 +1,6 @@
 // pages/products/[id].js
-import { useRouter } from 'next/router'
+import { useRouter } from 'next/navigation';  // Correct import for server components
+
 
 const ProductPage = ({ product }) => {
   const router = useRouter()
