@@ -1,39 +1,32 @@
 "use client";
-
 import { useEffect, useState } from "react";
 
-// Define types for Cart and CartItem
 type CartItem = {
-  id: number; // Use string if WooCommerce IDs are strings
+  key: string;
+  id: number;
   name: string;
   quantity: number;
-  price: number;
-};
-
-type Cart = {
-  items: CartItem[];
-  total_price: number;
+  totals: {
+    line_total: string;
+    line_subtotal: string;
+  };
 };
 
 export default function CartPage() {
-  const [cart, setCart] = useState<Cart>({
-    items: [],
-    total_price: 0,
-  }); // Default state
-  const [loading, setLoading] = useState(true); // Loading state
-  const [error, setError] = useState<string | null>(null); // Error state
+  const [cartItems, setCartItems] = useState<CartItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchCart = async () => {
       try {
-        const response = await fetch("/api/cart"); // Replace with your WooCommerce API endpoint
-        if (!response.ok) {
-          throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-        const data: Cart = await response.json(); // Ensure the data matches the `Cart` type
-        setCart(data);
+        const response = await fetch("https://bullet-mart.net.pk/wp-json/wc/store/cart/items");
+        if (!response.ok) throw new Error("Failed to fetch cart data");
+
+        const data: CartItem[] = await response.json();
+        setCartItems(data);
       } catch (err) {
-        setError(err.message);
+        setError((err as Error).message);
       } finally {
         setLoading(false);
       }
@@ -48,14 +41,17 @@ export default function CartPage() {
   return (
     <div>
       <h1>Your Cart</h1>
-      {cart.items.map((item) => (
-        <div key={item.id}>
-          <h2>{item.name}</h2>
-          <p>Quantity: {item.quantity}</p>
-          <p>Price: {item.price}</p>
-        </div>
-      ))}
-      <h3>Total: {cart.total_price}</h3>
+      {cartItems.length === 0 ? (
+        <p>Your cart is empty.</p>
+      ) : (
+        cartItems.map((item) => (
+          <div key={item.key}>
+            <h2>{item.name}</h2>
+            <p>Quantity: {item.quantity}</p>
+            <p>Price: {item.totals.line_total}</p>
+          </div>
+        ))
+      )}
     </div>
   );
 }
