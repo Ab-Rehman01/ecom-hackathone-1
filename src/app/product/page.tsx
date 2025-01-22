@@ -1,4 +1,8 @@
 // pages/products/[id].js
+
+"use client";
+
+
 import { useRouter } from 'next/navigation';  // Correct import for server components
 
 

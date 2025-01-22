@@ -81,38 +81,73 @@
 //   );
 // }
 
-"use client"; // Add this directive
-// src/app/components/Navbar.tsx
-import Link from "next/link";
-import { useCart } from "../context/CartContext"; // Use the context
+
+
+
+
+// "use client"; // Add this directive
+// // src/app/components/Navbar.tsx
+// import Link from "next/link";
+// import { useCart } from "../context/CartContext"; // Use the context
+
+// export default function Navbar() {
+//   const { cartCount } = useCart();  // Access the cart count from the context
+
+//   return (
+//     <nav>
+//       {/* Navbar content */}
+//       <div className="bg-white border-b p-5">
+//         <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
+//           {/* Logo */}
+//           <div>
+//             <Link href="/">
+//               <h1 className="text-black font-bold text-[22px] leading-[22px]">SHOP.CO</h1>
+//             </Link>
+//           </div>
+
+//           {/* Cart Icon with Cart Count */}
+//           <div className="flex items-center space-x-6">
+//             <Link href="/cart" className="relative">
+//               <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+//                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2m0 0h13.17l.58-2H5.4M5.4 5L7 14h10l1.6-9H5.4zM9 20a2 2 0 100-4 2 2 0 000 4zM15 20a2 2 0 100-4 2 2 0 000 4z" />
+//               </svg>
+//               {cartCount > 0 && (
+//                 <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-2 py-1">{cartCount}</span>
+//               )}
+//             </Link>
+//           </div>
+//         </div>
+//       </div>
+//     </nav>
+//   );
+// }
+
+
+// components/Navbar.js
+import { useEffect, useState } from 'react';
 
 export default function Navbar() {
-  const { cartCount } = useCart();  // Access the cart count from the context
+  const [cartCount, setCartCount] = useState(0);
+
+  useEffect(() => {
+    const fetchCart = async () => {
+      try {
+        const response = await fetch('/api/cart');
+        const data = await response.json();
+        setCartCount(data.cart.total_items || 0);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    fetchCart();
+  }, []);
 
   return (
     <nav>
-      {/* Navbar content */}
-      <div className="bg-white border-b p-5">
-        <div className="max-w-7xl mx-auto px-4 flex justify-between items-center">
-          {/* Logo */}
-          <div>
-            <Link href="/">
-              <h1 className="text-black font-bold text-[22px] leading-[22px]">SHOP.CO</h1>
-            </Link>
-          </div>
-
-          {/* Cart Icon with Cart Count */}
-          <div className="flex items-center space-x-6">
-            <Link href="/cart" className="relative">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 3h2l.4 2m0 0h13.17l.58-2H5.4M5.4 5L7 14h10l1.6-9H5.4zM9 20a2 2 0 100-4 2 2 0 000 4zM15 20a2 2 0 100-4 2 2 0 000 4z" />
-              </svg>
-              {cartCount > 0 && (
-                <span className="absolute top-0 right-0 bg-red-600 text-white text-xs rounded-full px-2 py-1">{cartCount}</span>
-              )}
-            </Link>
-          </div>
-        </div>
+      <h1>My E-Commerce Store</h1>
+      <div>
+        <a href="/cart">Cart ({cartCount})</a>
       </div>
     </nav>
   );
