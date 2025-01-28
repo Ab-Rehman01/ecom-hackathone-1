@@ -4,7 +4,7 @@ import Footer from "./components/Footer";
 import "./globals.css";
 // In your layout.tsx or RootLayout.tsx
 // src/app/layout.tsx
-import { CartProvider } from "./context/CartContext";  // Import CartProvider
+import { CartProvider } from "./components/context/CartContext";  // Import CartProvider
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

@@ -200,28 +200,73 @@
 //   )
 // }
 
-import React from 'react';
+// components/products/ProductDetails.tsx
 
-type ProductDetailProps = {
-  product: any; // Define proper type for product data
-};
+"use client";
+import React, { useState } from "react";
+import { useCart } from "../context/CartContext"; // Import useCart from context
 
-const ProductDetail: React.FC<ProductDetailProps> = ({ product }) => {
+interface ProductDetailsProps {
+  productId: number;
+  productName: string;
+  productPrice: number;
+}
+
+const ProductDetails: React.FC<ProductDetailsProps> = ({
+  productId,
+  productName,
+  productPrice,
+}) => {
+  const [quantity, setQuantity] = useState<number>(1); // Default quantity
+  const { addToCart } = useCart(); // Use the addToCart function from CartContext
+
+  const handleQuantityChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = Math.max(1, parseInt(e.target.value) || 1); // Prevent negative or zero quantities
+    setQuantity(value);
+  };
+
+  const handleAddToCart = () => {
+    // Add product to cart using CartContext
+    addToCart({
+      id: productId,
+      name: productName, // Optional: Include product name for cart display
+      price: productPrice, // Optional: Include product price for cart calculations
+      quantity: quantity,
+    });
+
+    alert(`Product "${productName}" with quantity ${quantity} added to cart.`);
+  };
+
   return (
-    <div className="product-detail">
-      <h1>{product.title?.rendered || 'Product Name'}</h1>
-      <img
-        src={product._embedded?.['wp:featuredmedia']?.[0]?.source_url || 'https://via.placeholder.com/300'}
-        alt={product.title?.rendered || 'Product Image'}
-        className="product-image"
-      />
-      <div className="product-description">
-        <p>{product.content?.rendered || 'No description available.'}</p>
-        <p><strong>Price:</strong> {product.price || 'Price not available'}</p>
+    <div className="product-details p-4 border rounded-lg shadow-md max-w-lg mx-auto">
+      <h1 className="text-2xl font-bold mb-2">{productName}</h1>
+      <p className="text-lg text-gray-700 mb-4">Price: Rs. {productPrice}</p>
+
+      <div className="flex items-center space-x-2 mb-4">
+        <label
+          htmlFor="quantity"
+          className="text-gray-600 font-medium text-sm"
+        >
+          Quantity:
+        </label>
+        <input
+          type="number"
+          id="quantity"
+          value={quantity}
+          onChange={handleQuantityChange}
+          min="1"
+          className="border rounded-md px-2 py-1 w-20 text-center"
+        />
       </div>
-      <button className="add-to-cart-btn">Add to Cart</button>
+
+      <button
+        onClick={handleAddToCart}
+        className="bg-blue-500 text-white font-semibold py-2 px-4 rounded hover:bg-blue-600"
+      >
+        Add to Cart
+      </button>
     </div>
   );
 };
 
-export default ProductDetail;
+export default ProductDetails;

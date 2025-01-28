@@ -44,13 +44,17 @@ export default function CartPage() {
       {cartItems.length === 0 ? (
         <p>Your cart is empty.</p>
       ) : (
-        cartItems.map((item) => (
-          <div key={item.key}>
-            <h2>{item.name}</h2>
-            <p>Quantity: {item.quantity}</p>
-            <p>Price: {item.totals.line_total}</p>
-          </div>
-        ))
+        Array.isArray(cartItems) && cartItems.length > 0 ? (
+          cartItems.map((item) => (
+            <div key={item.key} className="cart-item">
+              <h2>{item.name}</h2>
+              <p>Quantity: {item.quantity}</p>
+              <p>Price: {item.totals.line_total}</p>
+            </div>
+          ))
+        ) : (
+          <p>There was an error loading the cart items.</p>
+        )
       )}
     </div>
   );

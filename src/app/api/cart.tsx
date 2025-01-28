@@ -1,4 +1,4 @@
-import api from '@/utils/woocommerceApi'; // WooCommerce API instance
+import api from '@/utils/woocommerce'; // WooCommerce API instance
 
 export default async function handler(req, res) {
   try {

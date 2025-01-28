@@ -160,32 +160,30 @@
 // export default ProductsGrid;
 
 
+// Updated ProductsGrid Component
 'use client';
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import api from '@/utils/woocommerce'; // Import the WooCommerce API instance
+import { useCart } from '../context/CartContext'; // Import CartContext
 
 const ProductsGrid = () => {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<any[]>([]); // Product list
   const [loading, setLoading] = useState(true); // Loading state
   const [error, setError] = useState<string | null>(null); // Error state
+  const { addToCart } = useCart(); // Use CartContext
 
   useEffect(() => {
     const fetchProducts = async () => {
       try {
-        const response = await fetch(
-          'https://bullet-mart.net.pk/wp-json/wp/v2/product?_embed'
-        );
-        if (!response.ok) {
-          throw new Error('Failed to fetch products');
-        }
-        const data = await response.json();
-        setProducts(data);
+        const response = await api.get('products'); // Fetch products from WooCommerce
+        setProducts(response.data); // Set the product data
       } catch (err) {
         setError('پراڈکٹس لوڈ کرنے میں مسئلہ ہے۔ براہ کرم دوبارہ کوشش کریں۔');
         console.error('Error fetching products:', err);
       } finally {
-        setLoading(false);
+        setLoading(false); // End loading
       }
     };
 
@@ -193,52 +191,16 @@ const ProductsGrid = () => {
   }, []);
 
   const removeHtmlTags = (html: string): string => {
-    return html.replace(/<\/?[^>]+(>|$)/g, '');
+    return html.replace(/<\/?[^>]+(>|$)/g, ''); // Remove HTML tags from text
   };
-  const addToCart = async (productId: number) => {
+
+  const handleAddToCart = async (productId: number) => {
     try {
-      const response = await fetch(
-        'https://bullet-mart.net.pk/wp-json/wc/store/cart/items',
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            id: productId, // Product ID
-            quantity: 1,   // Default quantity
-          }),
-          credentials: 'include', // Ensure cookies are sent for session handling
-        }
-      );
-  
-      if (response.ok) {
-        const data = await response.json();
-        alert('پراڈکٹ کامیابی سے کارٹ میں شامل کر دی گئی ہے!');
-        console.log('Cart Response:', data); // Check if the response contains the updated cart items
-        fetchCartItems(); // Fetch updated cart items after adding to cart
-      } else {
-        const errorData = await response.json();
-        alert(`Error: ${errorData.message || 'Failed to add product to cart.'}`);
-        console.log('API Error:', errorData); // Log the API error
-      }
+      addToCart({ id:productId.toString(), quantity: 1 }); // Add to cart using context
+      alert('Product successfully added to the cart!');
     } catch (error) {
-      console.error('Error adding to cart:', error);
-      alert('کارٹ میں پراڈکٹ شامل کرنے میں مسئلہ ہوا');
-    }
-  };
-  
-  const fetchCartItems = async () => {
-    try {
-      const response = await fetch(
-        'https://bullet-mart.net.pk/wp-json/wc/store/cart/items'
-      );
-      if (response.ok) {
-        const cartItems = await response.json();
-        console.log('Updated Cart Items:', cartItems);
-      }
-    } catch (error) {
-      console.error('Error fetching cart items:', error);
+      console.error('Error adding product to cart:', error);
+      alert('Failed to add product to cart.');
     }
   };
 
@@ -252,29 +214,42 @@ const ProductsGrid = () => {
 
   return (
     <div className="products-page">
-      <h2 className="">All Products</h2>
-      <div className="product-list">
+      <h2>All Products</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {products.map((product) => (
-          <div key={product.id} className="product-card">
-            <h2>{product.title?.rendered || 'Title Not Available'}</h2>
+          <div key={product.id} className="product-card border rounded-lg p-4 shadow-md">
+            <h2 className="font-semibold text-lg">{product.name}</h2>
             <img
-              src={
-                product._embedded?.['wp:featuredmedia']?.[0]?.source_url ||
-                'https://via.placeholder.com/150'
-              }
-              alt={product.title?.rendered || 'Product Image'}
-              className="product-image"
+              src={product.images?.[0]?.src || 'https://via.placeholder.com/150'}
+              alt={product.name || 'Product Image'}
+              className="product-image w-full h-48 object-cover rounded-md"
             />
-            <p className="product-description">
-              {removeHtmlTags(product.excerpt?.rendered || '').slice(0, 100)}...
+            <p className="product-description text-sm text-gray-500">
+              {removeHtmlTags(product.description || '').slice(0, 100)}...
             </p>
-            <p>Price: {product.price || 'Product not available'}</p>
-            <Link href={`/products/${product.id}`} className="details-link">
-              more detail
+            <div className="product-prices mt-2">
+              {product.sale_price ? (
+                <>
+                  <p className="text-red-500 font-semibold">
+                    Sale Price: Rs. {product.sale_price}
+                  </p>
+                  <p className="text-gray-500 line-through">
+                    Regular Price: Rs. {product.regular_price}
+                  </p>
+                </>
+              ) : (
+                <p className="font-semibold">Price: Rs. {product.regular_price}</p>
+              )}
+            </div>
+            <Link
+              href={`/products/${product.id}`}
+              className="text-blue-600 underline mt-2 block"
+            >
+              More Detail
             </Link>
             <button
-              onClick={() => addToCart(product.id)} // Call the updated addToCart function
-              className="add-to-cart-btn"
+              onClick={() => handleAddToCart(product.id)}
+              className="add-to-cart-btn mt-2 bg-blue-500 text-white py-2 px-4 rounded-md"
             >
               Add to Cart
             </button>
